@@ -101,37 +101,43 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 <div><label for="student">Student name *</label><input id="student" required placeholder="e.g. Juan Dela Cruz"></div>
 <div><label for="contact">Contact number *</label><input id="contact" required inputmode="tel" placeholder="09XX XXX XXXX"></div>
 <div><label for="item">Item / belongings *</label><input id="item" required placeholder="e.g. Black backpack"></div>
-<option value="">Select compartment</option>
+<select id="compartment" required>
 
-<option>A-01</option>
+  <option value="">Select compartment</option>
 
-<option>A-02</option>
+  <option value="A-01">A-01</option>
 
-<option>A-03</option>
+  <option value="A-02">A-02</option>
 
-<option>B-01</option>
+  <option value="A-03">A-03</option>
 
-<option>B-02</option>
+  <option value="B-01">B-01</option>
 
-<option>B-03</option>
+  <option value="B-02">B-02</option>
 
-<option>C-01</option>
+  <option value="B-03">B-03</option>
 
-<option>C-02</option>
+  <option value="C-01">C-01</option>
 
-<option>C-03</option>
+  <option value="C-02">C-02</option>
 
-<option>D-01</option>
+  <option value="C-03">C-03</option>
 
-<option>D-02</option>
+  <option value="D-01">D-01</option>
 
-<option>D-03</option>
+  <option value="D-02">D-02</option>
 
-<option>E-01</option>
+  <option value="D-03">D-03</option>
 
-<option>E-02</option>
+  <option value="E-01">E-01</option>
 
-<option>E-03</option>
+  <option value="E-02">E-02</option>
+
+  <option value="E-03">E-03</option>
+
+</select>
+  <div class="full"><label
+
 <div class="full"><label for="notes">Item description (optional)</label><textarea id="notes" placeholder="Color, brand, or identifying details"></textarea></div>
 </div>
 <div class="actions"><button class="btn" type="submit">Register & Generate QR</button><button class="btn secondary" type="reset">Clear form</button></div>
