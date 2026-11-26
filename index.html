@@ -36,7 +36,49 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 #reader{max-width:420px;margin:12px auto} .verifyresult{margin-top:12px;padding:14px;border-radius:10px;background:#f3f7fb;line-height:1.6}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30px}
 .empty{color:var(--muted);text-align:center;padding:24px}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.full{grid-column:auto}.statrow{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}.card{padding:17px}}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.full{grid-column:auto}.statrow{grid-template-columns:1fr 1fr}table{display:block;overflow-x:auto;white-space:nowrap}.card{padding:17px}} 
+.compartment-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 12px 0 18px;
+  font-size: 13px;
+}
+
+.available-dot, .occupied-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.available-dot { background: #16835d; }
+.occupied-dot { background: #c24141; }
+
+.compartment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.compartment {
+  border: 2px solid #16835d;
+  background: #e8f7ef;
+  color: #13744d;
+  padding: 17px 7px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.compartment.occupied {
+  border-color: #c24141;
+  background: #fff0f0;
+  color: #a52d2d;
+}
+
 </style>
 </head>
 <body>
@@ -59,12 +101,41 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 <div><label for="student">Student name *</label><input id="student" required placeholder="e.g. Juan Dela Cruz"></div>
 <div><label for="contact">Contact number *</label><input id="contact" required inputmode="tel" placeholder="09XX XXX XXXX"></div>
 <div><label for="item">Item / belongings *</label><input id="item" required placeholder="e.g. Black backpack"></div>
-<div><label for="compartment">Compartment *</label><select id="compartment" required><option value="">Select compartment</option><option>A-01</option><option>A-02</option><option>A-03</option><option>B-01</option><option>B-02</option><option>B-03</option></select></div>
+<option value="">Select compartment</option>
+
+<option>A-01</option>
+
+<option>A-02</option>
+
+<option>A-03</option>
+
+<option>B-01</option>
+
+<option>B-02</option>
+
+<option>B-03</option>
+
+<option>C-01</option>
+
+<option>C-02</option>
+
+<option>C-03</option>
+
+<option>D-01</option>
+
+<option>D-02</option>
+
+<option>D-03</option>
+
+<option>E-01</option>
+
+<option>E-02</option>
+
+<option>E-03</option>
 <div class="full"><label for="notes">Item description (optional)</label><textarea id="notes" placeholder="Color, brand, or identifying details"></textarea></div>
 </div>
 <div class="actions"><button class="btn" type="submit">Register & Generate QR</button><button class="btn secondary" type="reset">Clear form</button></div>
 </form>
-<p class="notice" style="margin-top:16px">Demo note: This prototype saves sample transactions in this browser only. Use a real database and staff verification for an actual school service.</p>
 </div>
 <div class="card" id="ticket">
 <h2>Your claim ticket</h2><p class="sub">Save this QR code. Present it to the station staff when claiming your item.</p>
@@ -100,7 +171,31 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 <section id="admin" class="panel">
 <div class="card">
 <h2>Admin dashboard</h2><p class="sub">View registered belongings and update their status after the item is released.</p>
-<div class="statrow"><div class="stat"><strong id="totalCount">0</strong><span>Total registrations</span></div><div class="stat"><strong id="storedCount">0</strong><span>Currently stored</span></div><div class="stat"><strong id="claimedCount">0</strong><span>Already claimed</span></div></div>
+<div class="statrow"><div class="stat"><strong id="totalCount">0</strong><span>Total registrations</span></div><div class="stat"><strong id="storedCount">0</strong><span>Currently stored</span></div><div class="stat"><strong id="claimedCount">0</strong><span>Already claimed</span></div></div> <h3>Compartment Monitoring</h3>
+<h3>Compartment Monitoring</h3>
+<p class="sub">Current status of all 15 compartments</p>
+
+<div class="compartment-legend">
+
+  <span><i class="available-dot"></i> Available</span>
+
+  <span><i class="occupied-dot"></i> Occupied</span>
+
+</div>
+
+<div id="compartmentGrid" class="compartment-grid"></div>
+
+<div id="compartmentDetails" class="notice">
+
+  Select a compartment to view its details.
+
+</div>
+
+<p class="sub">
+
+  Available: <b id="availableCount">15</b> / 15
+
+</p>
 <div class="actions"><button class="btn secondary" id="refresh">Refresh records</button><button class="btn danger" id="clearAll">Clear demo records</button></div>
 <div style="overflow-x:auto;margin-top:15px"><table><thead><tr><th>Transaction</th><th>Student / Contact</th><th>Item</th><th>Compartment</th><th>Status</th><th>Action</th></tr></thead><tbody id="records"><tr><td colspan="6" class="empty">No records yet. Register a drop-off first.</td></tr></tbody></table></div>
 </div>
@@ -140,9 +235,77 @@ function verify(code){code=(code||'').trim().toUpperCase();const r=records.find(
 }
 document.getElementById('verifyBtn').onclick=()=>verify(document.getElementById('verifyCode').value);
 function markClaimed(id){const r=records.find(x=>x.id===id);if(r&&r.status==='Stored'){r.status='Claimed';r.claimedAt=new Date().toLocaleString();save();verify(id)}}
-function renderAdmin(){document.getElementById('totalCount').textContent=records.length;document.getElementById('storedCount').textContent=records.filter(r=>r.status==='Stored').length;document.getElementById('claimedCount').textContent=records.filter(r=>r.status==='Claimed').length;const body=document.getElementById('records');if(!records.length){body.innerHTML='<tr><td colspan="6" class="empty">No records yet. Register a drop-off first.</td></tr>';return}
- body.innerHTML=records.slice().reverse().map(r=>'<tr><td><b>'+escapeHtml(r.id)+'</b><br><small>'+escapeHtml(r.created)+'</small></td><td>'+escapeHtml(r.student)+'<br><small>'+escapeHtml(r.contact)+'</small></td><td>'+escapeHtml(r.item)+(r.notes?'<br><small>'+escapeHtml(r.notes)+'</small>':'')+'</td><td>'+escapeHtml(r.compartment)+'</td><td><span class="pill '+(r.status==='Stored'?'stored':'claimed')+'">'+escapeHtml(r.status)+'</span></td><td>'+(r.status==='Stored'?'<button class="btn secondary" onclick="markClaimed(\''+r.id+'\')">Mark claimed</button>':'—')+'</td></tr>').join('')}
-document.getElementById('refresh').onclick=renderAdmin;document.getElementById('clearAll').onclick=()=>{if(confirm('Delete all demo records from this browser?')){records=[];save();document.getElementById('verifyResult').textContent='No transaction checked yet.'}};
+function renderAdmin(){
+  document.getElementById('totalCount').textContent=records.length;
+  document.getElementById('storedCount').textContent=records.filter(r=>r.status==='Stored').length;
+  document.getElementById('claimedCount').textContent=records.filter(r=>r.status==='Claimed').length;
+
+  const compartments=[
+    'A-01','A-02','A-03',
+    'B-01','B-02','B-03',
+    'C-01','C-02','C-03',
+    'D-01','D-02','D-03',
+    'E-01','E-02','E-03'
+  ];
+
+  const grid=document.getElementById('compartmentGrid');
+  const details=document.getElementById('compartmentDetails');
+
+  window.showCompartmentDetails=function(id){
+    const r=records.find(x=>x.compartment===id && x.status==='Stored');
+
+    if(r){
+      details.innerHTML=
+        '<b>'+id+' — Occupied</b><br>'+
+        'Student: '+escapeHtml(r.student)+'<br>'+
+        'Contact: '+escapeHtml(r.contact)+'<br>'+
+        'Item: '+escapeHtml(r.item)+'<br>'+
+        'Transaction ID: '+escapeHtml(r.id);
+    }else{
+      details.innerHTML='<b>'+id+' — Available</b><br>No item stored in this compartment.';
+    }
+  };
+
+  grid.innerHTML=compartments.map(id=>{
+    const occupied=records.some(r=>r.compartment===id && r.status==='Stored');
+
+    return '<button class="compartment '+(occupied?'occupied':'')+'" onclick="showCompartmentDetails(\''+id+'\')">'+
+      '<b>'+id+'</b><br>'+
+      (occupied?'Occupied':'Available')+
+      '</button>';
+  }).join('');
+
+  const availableCount=compartments.filter(id=>
+    !records.some(r=>r.compartment===id && r.status==='Stored')
+  ).length;
+
+  document.getElementById('availableCount').textContent=availableCount;
+
+  const body=document.getElementById('records');
+
+  if(!records.length){
+    body.innerHTML='<tr><td colspan="6" class="empty">No records yet. Register a drop-off first.</td></tr>';
+  }else{
+    body.innerHTML=records.slice().reverse().map(r=>
+      '<tr><td><b>'+escapeHtml(r.id)+'</b><br><small>'+escapeHtml(r.created)+'</small></td>'+
+      '<td>'+escapeHtml(r.student)+'<br><small>'+escapeHtml(r.contact)+'</small></td>'+
+      '<td>'+escapeHtml(r.item)+(r.notes?'<br><small>'+escapeHtml(r.notes)+'</small>':'')+'</td>'+
+      '<td>'+escapeHtml(r.compartment)+'</td>'+
+      '<td><span class="pill '+(r.status==='Stored'?'stored':'claimed')+'">'+escapeHtml(r.status)+'</span></td>'+
+      '<td>'+(r.status==='Stored'?'<button class="btn secondary" onclick="markClaimed(\''+r.id+'\')">Mark claimed</button>':'-')+'</td></tr>'
+    ).join('');
+  }
+
+  document.getElementById('refresh').onclick=renderAdmin;
+
+  document.getElementById('clearAll').onclick=()=>{
+    if(confirm('Delete all demo records from this browser?')){
+      records=[];
+      save();
+      document.getElementById('verifyResult').textContent='No transaction checked yet.';
+    }
+  };
+};
 let scanner=null;
 document.getElementById('startScan').onclick=async()=>{const box=document.getElementById('verifyResult');if(!window.Html5Qrcode){box.textContent='Scanner library could not load. Enter the transaction ID manually.';return}try{scanner=new Html5Qrcode('reader');await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},decoded=>{document.getElementById('verifyCode').value=decoded;verify(decoded);scanner.stop().catch(()=>{})},()=>{});}catch(e){box.textContent='Camera could not start. Allow camera access or enter the transaction ID manually.'}};
 document.getElementById('stopScan').onclick=()=>{if(scanner)scanner.stop().catch(()=>{})};
