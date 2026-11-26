@@ -87,12 +87,61 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 <h1>Drop & Grab Station</h1>
 <p>A simple way for students to register, store, and claim their belongings using a unique QR code.</p>
 <nav>
-<button class="active" data-tab="drop">Drop-off</button>
-<button data-tab="claim">Claim / Verify</button>
-<button data-tab="admin">Admin Dashboard</button>
+
+  <button class="active" data-tab="welcome">Home</button>
+
+  <button data-tab="drop">Drop-off</button>
+
+  <button id="staffLoginBtn" type="button">Staff Login</button>
+
+  <button class="staff-only" data-tab="claim" style="display:none;">Claim / Verify</button>
+
+  <button class="staff-only" data-tab="admin" style="display:none;">Admin Dashboard</button>
+
 </nav></div></header>
 <main>
-<section id="drop" class="panel active">
+
+<section id="welcome" class="panel active">
+
+  <div class="card" style="text-align:center;padding:40px 20px">
+
+    <h2>Welcome to Drop & Grab Station!</h2>
+
+    <p class="sub">
+
+      A safe and convenient way to keep your belongings
+
+      while enjoying your school activities.
+
+    </p>
+
+    <button class="btn" onclick="showTab('drop')">
+
+      Drop an Item
+
+    </button>
+
+  </div>
+
+</section>
+  <section id="staffLogin" class="panel">
+
+  <div class="card" style="max-width:400px;margin:auto;text-align:center;padding:30px">
+
+    <h2>Staff Login</h2>
+
+    <p class="sub">Authorized staff only</p>
+
+    <input type="password" id="staffPassword" placeholder="Enter staff password">
+
+    <button class="btn" onclick="staffLogin()">Login</button>
+
+    <p id="loginMessage"></p>
+
+  </div>
+
+</section>
+<section id="drop" class="panel">
 <div class="grid">
 <div class="card">
 <h2>Register a drop-off</h2><p class="sub">Enter the student's details and the item to be stored. A unique transaction code and QR ticket will be created.</p>
@@ -164,7 +213,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 </div>
 </div>
 </section>
-<section id="claim" class="panel">
+<section id="claim" class="panel staff-only" style="display:none;">
 <div class="card">
 <h2>Claim / QR verification</h2><p class="sub">Scan the student's QR code, or type the transaction ID printed below it.</p>
 <div class="grid">
@@ -174,7 +223,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 30p
 <div id="verifyResult" class="verifyresult">No transaction checked yet.</div>
 </div>
 </section>
-<section id="admin" class="panel">
+<section id="admin" class="panel staff-only" style="display:none;">
 <div class="card">
 <h2>Admin dashboard</h2><p class="sub">View registered belongings and update their status after the item is released.</p>
 <div class="statrow"><div class="stat"><strong id="totalCount">0</strong><span>Total registrations</span></div><div class="stat"><strong id="storedCount">0</strong><span>Currently stored</span></div><div class="stat"><strong id="claimedCount">0</strong><span>Already claimed</span></div></div> <h3>Compartment Monitoring</h3>
@@ -213,8 +262,38 @@ const KEY='dropGrabDemoRecords';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
 function save(){localStorage.setItem(KEY,JSON.stringify(records));renderAdmin()}
 function makeId(){let n=1;while(records.some(r=>r.id==='DG-'+String(n).padStart(5,'0')))n++;return 'DG-'+String(n).padStart(5,'0')}
-function showTab(id){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='admin')renderAdmin()}
-document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(x=>{
+    x.classList.toggle('active',x.id===id);
+  });
+
+  document.querySelectorAll('nav button[data-tab]').forEach(x=>{
+    x.classList.toggle('active',x.dataset.tab===id);
+  });
+
+  if(id==='admin') renderAdmin();
+}
+function staffLogin(){
+  const password = document.getElementById('staffPassword').value;
+  const message = document.getElementById('loginMessage');
+
+  if(password === 'DGstaff2026'){
+    document.querySelectorAll('.staff-only').forEach(x=>{
+      x.style.display = '';
+    });
+
+    message.textContent = 'Login successful!';
+    showTab('claim');
+  } else {
+    message.textContent = 'Incorrect password. Please try again.';
+  }
+}  
+document.querySelectorAll('nav button[data-tab]').forEach(b=>{
+  b.addEventListener('click',()=>showTab(b.dataset.tab));
+});
+ document.getElementById('staffLoginBtn').addEventListener('click',()=>{
+  showTab('staffLogin');
+}); 
 document.getElementById('dropForm').addEventListener('submit',e=>{
  e.preventDefault();const compartment=document.getElementById('compartment').value;
  if(records.some(r=>r.compartment===compartment&&r.status==='Stored')){alert('That compartment is currently occupied. Please choose another.');return}
